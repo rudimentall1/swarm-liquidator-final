@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MEV Swarm Narrated Demo</title>
+
+    <style>
+        body {
+            margin:0;
+            font-family: monospace;
+            background:#0b0f14;
+            color:white;
+        }
+
+        header {
+            padding:10px;
+            background:#111;
+        }
+
+        .grid {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            height:90vh;
+        }
+
+        .box {
+            padding:10px;
+            border:1px solid #222;
+        }
+
+        .narration {
+            font-size:18px;
+            color:#7aa2f7;
+            padding:10px;
+        }
+
+        .winner {
+            color:#9ece6a;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    🚀 MEV Swarm — NARRATED DEMO MODE
+
+    <div style="margin-top:10px;">
+        <button onclick="fetch('http://localhost:8000/reset', {method:'POST'})">
+            RESET DEMO
+        </button>
+
+        <button onclick="fetch('http://localhost:8000/killer', {method:'POST'})">
+            🔥 KILLER MODE
+        </button>
+    </div>
+</header>
+
+<div class="narration" id="narration">waiting...</div>
+
+<div class="grid">
+
+    <div class="box">
+        <h3>TX</h3>
+        <pre id="tx"></pre>
+    </div>
+
+    <div class="box">
+        <h3>BIDS</h3>
+        <div id="bids"></div>
+
+        <h3 class="winner" id="winner"></h3>
+    </div>
+
+</div>
+
+<script>
+
+let ws;
+
+function kill(){
+    fetch("http://localhost:8000/killer", {method:"POST"});
+}
+
+function connect(){
+    ws = new WebSocket("ws://localhost:8000/ws");
+
+    ws.onmessage = (e)=>{
+        const msg = JSON.parse(e.data);
+        const d = msg.data;
+
+        document.getElementById("tx").innerText =
+            JSON.stringify(d.tx || {}, null, 2);
+
+        document.getElementById("narration").innerText =
+            "🧠 " + (d.narration || "");
+
+        const bids = d.bids || [];
+
+        document.getElementById("bids").innerHTML =
+            bids.slice(-10).map(b =>
+                `node ${b.node} | score ${b.score} | lat ${b.latency}`
+            ).join("<br>");
+
+        if(bids.length>0){
+            const best = bids.reduce((a,b)=>a.score>b.score?a:b);
+
+            document.getElementById("winner").innerText =
+                "🏁 WINNER: " + best.node;
+        }
+    };
+
+    ws.onclose = ()=>setTimeout(connect,1000);
+}
+
+connect();
+
+</script>
+
+</body>
+</html>

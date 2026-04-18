@@ -14,7 +14,7 @@ We built a swarm of 3 P2P agents. They watch for risky positions, agree on a sin
 5. All agents sign the decision (Ed25519)
 
 ## Run It Yourself
-```bash
+
 git clone https://github.com/rudimentall1/swarm-liquidator-final
 cd swarm-liquidator-final
 pip install -r requirements.txt

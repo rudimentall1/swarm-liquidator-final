@@ -1,18 +1,34 @@
-#  Swarm Liquidator — Real-Time MEV Execution Market Simulator
+# Swarm Liquidator — Stop MEV Theft on Liquidations
 
-##  Overview
+## Problem (Real Loss)
+When you borrow crypto and your collateral drops, MEV bots front-run your liquidation. They see your transaction first, execute their own, and you lose money. This is not a bug. This is how current systems work.
 
-Swarm Liquidator is a real-time execution market simulator that makes MEV dynamics observable and reveals how latency creates non-linear instability in transaction ordering under competition.
+## Solution (What We Fix)
+We built a swarm of 3 P2P agents. They watch for risky positions, agree on a single fair liquidation order, and sign it. No front-running. No central server.
 
-It transforms blockchain execution from a black-box process into a live, interactive and measurable market.
+## How It Works (30 seconds)
+1. Agent A, B, C discover each other (no setup needed)
+2. Every 5 seconds they send heartbeats — swarm is alive
+3. Every 30 seconds they elect a leader
+4. Leader decides the liquidation order
+5. All agents sign the decision (Ed25519)
 
----
+## Run It Yourself
+```bash
+# Clone
+git clone https://github.com/rudimentall1/swarm-liquidator-final
+cd swarm-liquidator-final
 
-## Problem
+# Install
+pip install -r requirements.txt
 
-Modern decentralized execution systems are opaque.
+# Terminal 1: Start broker
+mosquitto -v
 
-Transaction ordering, MEV competition, and latency effects are hidden inside block production and are not observable in real time.
+# Terminals 2, 3, 4: Run 3 agents
+python node.py agent_a
+python node.py agent_b
+python node.py agent_c
 
  HEAD
 ## Demo
